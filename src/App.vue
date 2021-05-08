@@ -1,6 +1,9 @@
 <template>
   <div id="app">
-    <vue-virtualized :sourceList="sourceList" :overscan="overscan"></vue-virtualized>
+    <vue-virtualized
+      :sourceList="sourceList"
+      :overscan="overscan"
+    ></vue-virtualized>
   </div>
 </template>
 
@@ -57,5 +60,4 @@ export default {
   color: #2c3e50;
   width: 100vw;
 }
-
 </style>

@@ -13,8 +13,8 @@
         {{ getFirstCharOfName(name) }}
       </div>
       <div class="vue-virtualized--right">
-        <span>{{ name }}</span>
-        <span>This is row {{ startIndex + index }}</span>
+        <p>{{ name }}</p>
+        <p>This is row {{ startIndex + index }}</p>
       </div>
     </div>
   </div>
@@ -63,10 +63,16 @@ export default {
     }
   },
 
+  created() {
+    // 后回到顶部
+    setTimeout(() => window.scrollTo(0, 0), 150);
+  },
+
   mounted() {
     // 初始化 container 高度、可视区域展示的个数、startOffset、endOffset 等值
     this.init();
 
+    // 设置 scroll 监听，更新数据
     let before = 0;
     window.addEventListener(
       "scroll",
@@ -98,37 +104,37 @@ export default {
     updateData() {
       if (this.direction === "up") {
         this.shownList.shift();
-        this.shownList.push(this.sourceList[this.endIndex]);
-
-        this.$nextTick(() => {
-          this.cache.shift();
-          const eleList = document.querySelectorAll(".vue-virtualized--item");
-          this.cachePosition(
-            Array.from(eleList)[eleList.length - 1],
-            this.endIndex
-          );
-        });
+        this.shownList.push(this.sourceList[this.endIndex - 1]);
       } else if (this.direction === "down") {
-        // TODO 下拉有 bug
-        this.shownList.pop();
-        this.shownList.reverse();
-        this.shownList.push(this.sourceList[this.startIndex - 1]);
-        this.shownList.reverse();
+        if (this.startIndex > -1) {
+          this.shownList.pop();
 
-        this.$nextTick(() => {
-          this.cache.pop();
-          const eleList = document.querySelectorAll(".vue-virtualized--item");
-          this.cachePosition(
-            Array.from(eleList)[0],
-            this.startIndex - 1,
-            false
-          );
-        });
+          const shownList = this.shownList;
+          shownList.reverse();
+          shownList.push(this.sourceList[this.startIndex]);
+          shownList.reverse();
+          this.shownList = [...shownList];
+        } else {
+          return;
+        }
       }
 
-      this.startOffset = this.anchorItem.top;
-      this.endOffset =
-        (this.sourceList.length - this.endIndex) * this.rowHeight;
+      this.$nextTick(() => {
+        this.startOffset = this.anchorItem.top;
+        this.endOffset =
+          (this.sourceList.length - this.endIndex) * this.rowHeight +
+          (this.visibleCount * this.rowHeight - parseInt(this.containerHeight));
+
+        if (this.endIndex > this.cache.length) {
+          this.$nextTick(() => {
+            const eleList = document.querySelectorAll(".vue-virtualized--item");
+            this.cachePosition(
+              Array.from(eleList)[eleList.length - 1],
+              this.endIndex - 1
+            );
+          });
+        }
+      });
     },
     updateBoundaryIndex(scrollTop = 0) {
       const anchorItem = this.cache.find((item) => {
@@ -141,31 +147,21 @@ export default {
 
       this.anchorItem = { ...anchorItem };
       this.startIndex = this.anchorItem.index;
-      this.endIndex = this.startIndex + this.visibleCount - 1;
+      this.endIndex = this.startIndex + this.visibleCount;
     },
     /**
      * 缓存可视区域的 data
      */
-    cachePosition(node, index, isTrail = true) {
+    cachePosition(node, index) {
       if (node) {
         const rect = node.getBoundingClientRect();
         const top = rect.top + window.pageYOffset;
 
-        if (isTrail) {
-          this.cache.push({
-            index: index,
-            top,
-            bottom: top + this.rowHeight
-          });
-        } else {
-          this.cache.reverse();
-          this.cache.push({
-            index: index,
-            top,
-            bottom: top + this.rowHeight
-          });
-          this.cache.reverse();
-        }
+        this.cache.push({
+          index: index,
+          top,
+          bottom: top + this.rowHeight
+        });
       }
     },
     init() {
@@ -176,12 +172,14 @@ export default {
         this.visibleCount = Math.ceil(
           parseInt(this.containerHeight) / this.rowHeight
         );
+
         this.startIndex = 0;
-        this.endIndex = this.startIndex + this.visibleCount - 1;
+        this.endIndex = this.startIndex + this.visibleCount;
         this.shownList = this.sourceList.slice(this.startIndex, this.endIndex);
         this.startOffset = 0;
         this.endOffset =
-          (this.sourceList.length - this.endIndex) * this.rowHeight;
+          (this.sourceList.length - this.endIndex) * this.rowHeight +
+          (this.visibleCount * this.rowHeight - parseInt(this.containerHeight));
 
         this.$nextTick(() => {
           const eleList = document.querySelectorAll(".vue-virtualized--item");
@@ -198,8 +196,9 @@ export default {
 
 <style scoped>
 .vue-virtualized {
-  display: flex;
-  flex-direction: column;
+  /* TODO: 使用 flex 后高度不是指定高度 */
+  /* display: flex;
+  flex-direction: column; */
   height: 100vh;
 }
 
@@ -209,6 +208,7 @@ export default {
   padding-left: 15px;
   border: 1px solid #e0e0e0;
   border-bottom: none;
+  box-sizing: border-box;
 }
 
 .vue-virtualized--item:last-child {
@@ -223,16 +223,12 @@ export default {
   line-height: 40px;
   border-radius: 50%;
   color: #fff;
-  font-size: 1.5em;
+  font-size: 17px;
   background: rgb(244, 67, 54);
 }
 
-.vue-virtualized--right {
-  display: flex;
-  flex-direction: column;
-}
-
-span {
+p {
+  margin: 0;
   text-align: start;
 }
 </style>

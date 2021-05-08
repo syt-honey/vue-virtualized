@@ -40,7 +40,7 @@ export default {
   data() {
     return {
       shownList: [],
-      containerHeight: null,
+      screenHeight: null,
       startIndex: 0,
       endIndex: 0,
       startOffset: 0,
@@ -64,15 +64,15 @@ export default {
   },
 
   created() {
-    // 后回到顶部
+    // Return to the top when refreshing the page
     setTimeout(() => window.scrollTo(0, 0), 150);
   },
 
   mounted() {
-    // 初始化 container 高度、可视区域展示的个数、startOffset、endOffset 等值
+    // Initial height of container, the count of viewable area、startOffset、endOffset etc
     this.init();
 
-    // 设置 scroll 监听，更新数据
+    // Set scroll listener to update data
     let before = 0;
     window.addEventListener(
       "scroll",
@@ -84,7 +84,7 @@ export default {
         if (after > before) {
           if (after > this.anchorItem.bottom && this.anchorItem.bottom) {
             this.direction = "up";
-            // 更新 startIndex、endIndex、shownList、anchorItem、
+            // update startIndex, endIndex, shownList, anchorItem, etc
             this.updateBoundaryIndex(after);
             this.updateData();
           }
@@ -103,18 +103,18 @@ export default {
   methods: {
     updateData() {
       if (this.direction === "up") {
-        this.shownList.shift();
+        this.shownList.reverse();
+        this.shownList.pop();
+        this.shownList.reverse();
         this.shownList.push(this.sourceList[this.endIndex - 1]);
       } else if (this.direction === "down") {
         if (this.startIndex > -1) {
           this.shownList.pop();
-
-          const shownList = this.shownList;
-          shownList.reverse();
-          shownList.push(this.sourceList[this.startIndex]);
-          shownList.reverse();
-          this.shownList = [...shownList];
+          this.shownList.reverse();
+          this.shownList.push(this.sourceList[this.startIndex]);
+          this.shownList.reverse();
         } else {
+          // In theory, this is unreachable
           return;
         }
       }
@@ -123,7 +123,7 @@ export default {
         this.startOffset = this.anchorItem.top;
         this.endOffset =
           (this.sourceList.length - this.endIndex) * this.rowHeight +
-          (this.visibleCount * this.rowHeight - parseInt(this.containerHeight));
+          (this.visibleCount * this.rowHeight - parseInt(this.screenHeight));
 
         if (this.endIndex > this.cache.length) {
           this.$nextTick(() => {
@@ -150,7 +150,7 @@ export default {
       this.endIndex = this.startIndex + this.visibleCount;
     },
     /**
-     * 缓存可视区域的 data
+     * Cache data in the visible area
      */
     cachePosition(node, index) {
       if (node) {
@@ -166,11 +166,11 @@ export default {
     },
     init() {
       this.$nextTick(() => {
-        this.containerHeight = window.getComputedStyle(
+        this.screenHeight = window.getComputedStyle(
           document.querySelector(".vue-virtualized")
         ).height;
         this.visibleCount = Math.ceil(
-          parseInt(this.containerHeight) / this.rowHeight
+          parseInt(this.screenHeight) / this.rowHeight
         );
 
         this.startIndex = 0;
@@ -179,7 +179,7 @@ export default {
         this.startOffset = 0;
         this.endOffset =
           (this.sourceList.length - this.endIndex) * this.rowHeight +
-          (this.visibleCount * this.rowHeight - parseInt(this.containerHeight));
+          (this.visibleCount * this.rowHeight - parseInt(this.screenHeight));
 
         this.$nextTick(() => {
           const eleList = document.querySelectorAll(".vue-virtualized--item");
@@ -196,7 +196,7 @@ export default {
 
 <style scoped>
 .vue-virtualized {
-  /* TODO: 使用 flex 后高度不是指定高度 */
+  /* TODO: The height after using flex is not the specified height */
   /* display: flex;
   flex-direction: column; */
   height: 100vh;

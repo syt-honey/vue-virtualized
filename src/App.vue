@@ -1,9 +1,6 @@
 <template>
   <div id="app">
-    <vue-virtualized
-      :sourceList="sourceList"
-      :overscan="overscan"
-    ></vue-virtualized>
+    <vue-virtualized :sourceList="sourceList"></vue-virtualized>
   </div>
 </template>
 
@@ -17,8 +14,7 @@ export default {
   },
   data() {
     return {
-      sourceList: [],
-      overscan: 8
+      sourceList: []
     };
   },
   mounted() {
@@ -29,7 +25,7 @@ export default {
   },
   methods: {
     /**
-     * caseType: 大写还是小写，0 大写，1 小写
+     * caseType: uppercase letter or lowercase letter，0 uppercase，1 lowercase
      */
     genRandomChar(caseType) {
       const step = caseType === 0 ? 65 : 97;
@@ -51,13 +47,3 @@ export default {
 };
 </script>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  width: 100vw;
-}
-</style>

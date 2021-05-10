@@ -3,7 +3,7 @@
 ## Features to be supported
 
 - [x] Support custom rowHeight height  
-- [ ] Expose index and item to users  
+- [x] Expose index and item to users  
 - [ ] Support setting overscan   
 - [ ] Support custom list width and height  
 

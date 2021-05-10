@@ -4,25 +4,19 @@
     :style="{ paddingTop: startOffset + 'px', paddingBottom: endOffset + 'px' }"
   >
     <div
-      v-for="(name, index) in shownList"
+      v-for="(row, index) in shownList"
       :key="index"
       class="vue-virtualized--item"
-      :style="{ height: rowHeight + 'px' }"
+      :style="{ height: rowHeight ? rowHeight + 'px' : 'auto' }"
     >
-      <div class="vue-virtualized--avatar">
-        {{ getFirstCharOfName(name) }}
-      </div>
-      <div class="vue-virtualized--right">
-        <p>{{ name }}</p>
-        <p>This is row {{ startIndex + index }}</p>
-      </div>
+      <slot :row="row" :index="index + startIndex"></slot>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: "VueVirtaulized",
+  name: "VVirtaulizedList",
   props: {
     sourceList: {
       type: Array,
@@ -34,7 +28,7 @@ export default {
     },
     rowHeight: {
       type: Number,
-      default: () => 60
+      default: () => 100
     }
   },
   data() {
@@ -55,13 +49,7 @@ export default {
       direction: ""
     };
   },
-  computed: {
-    getFirstCharOfName() {
-      return function (name) {
-        return name.substr(0, 1);
-      };
-    }
-  },
+  watch: {},
 
   created() {
     // Return to the top when refreshing the page
@@ -107,12 +95,14 @@ export default {
         this.shownList.pop();
         this.shownList.reverse();
         this.shownList.push(this.sourceList[this.endIndex - 1]);
+        this.currentShowList = this.shownList;
       } else if (this.direction === "down") {
         if (this.startIndex > -1) {
           this.shownList.pop();
           this.shownList.reverse();
           this.shownList.push(this.sourceList[this.startIndex]);
           this.shownList.reverse();
+          this.currentShowList = this.shownList;
         } else {
           // In theory, this is unreachable
           return;
@@ -176,6 +166,7 @@ export default {
         this.startIndex = 0;
         this.endIndex = this.startIndex + this.visibleCount;
         this.shownList = this.sourceList.slice(this.startIndex, this.endIndex);
+        this.currentShowList = this.shownList;
         this.startOffset = 0;
         this.endOffset =
           (this.sourceList.length - this.endIndex) * this.rowHeight +
@@ -203,8 +194,6 @@ export default {
 }
 
 .vue-virtualized--item {
-  display: flex;
-  align-items: center;
   padding-left: 15px;
   border: 1px solid #e0e0e0;
   border-bottom: none;

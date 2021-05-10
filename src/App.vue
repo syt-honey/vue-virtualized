@@ -1,16 +1,23 @@
 <template>
   <div id="app">
-    <vue-virtualized :sourceList="sourceList"></vue-virtualized>
+    <v-virtualized-list :sourceList="sourceList">
+      <template slot-scope="scope">
+        <p>row name is: {{ scope.row.name }}</p>
+        <p>row id is: {{ scope.row.id }}</p>
+        <p>row index is: {{ scope.index }}</p>
+        <p>row index is: {{ scope.index }}</p>
+      </template>
+    </v-virtualized-list>
   </div>
 </template>
 
 <script>
-import VueVirtualized from "./components/VueVirtualized";
+import VVirtualizedList from "./components/VVirtualizedList";
 
 export default {
   name: "App",
   components: {
-    VueVirtualized
+    VVirtualizedList
   },
   data() {
     return {
@@ -20,7 +27,10 @@ export default {
   mounted() {
     let lenOfName = 6;
     for (let i = 0; i < 100; ++i) {
-      this.sourceList.push(this.genName(lenOfName));
+      this.sourceList.push({
+        name: this.genName(lenOfName),
+        id: i
+      });
     }
   },
   methods: {

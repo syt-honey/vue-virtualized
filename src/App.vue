@@ -1,12 +1,10 @@
 <template>
   <div id="app">
-    <v-virtualized-list :sourceList="sourceList">
-      <template slot-scope="scope">
-        <p>row name is: {{ scope.row.name }}</p>
-        <p>row id is: {{ scope.row.id }}</p>
-        <p>row index is: {{ scope.index }}</p>
-        <p>row index is: {{ scope.index }}</p>
-      </template>
+    <v-virtualized-list :sourceList="sourceList" v-slot="slotProps">
+      <p>row name is: {{ slotProps.row.name }}</p>
+      <p>row id is: {{ slotProps.row.id }}</p>
+      <p>row index is: {{ slotProps.index }}</p>
+      <p>row index is: {{ slotProps.index }}</p>
     </v-virtualized-list>
   </div>
 </template>

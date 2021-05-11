@@ -9,6 +9,7 @@
       class="vue-virtualized--item"
       :style="{ height: rowHeight ? rowHeight + 'px' : 'auto' }"
     >
+      <!-- slot prop -->
       <slot :row="row" :index="index + startIndex"></slot>
     </div>
   </div>
